@@ -1,4 +1,2 @@
 aiogram>=2.9.2
 numpy>=1.19.0
-https://download.pytorch.org/whl/cpu/torch-1.5.1%2Bcpu-cp37-cp37m-linux_x86_64.whl
-https://download.pytorch.org/whl/cpu/torchvision-0.6.1%2Bcpu-cp37-cp37m-linux_x86_64.whl
