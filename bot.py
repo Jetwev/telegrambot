@@ -70,7 +70,7 @@ settings_personal_kb.add(InlineKeyboardButton('Back', callback_data='menu'))
 @dp.message_handler(commands=['start'])
 async def send_welcome(message: types.Message):
     await bot.send_message(message.chat.id, f"Hi {message.from_user.first_name}! I'm Style-Transfer bot.\n"
-    + "I can transfer style from one picture to another.\n" + "What I can:", reply_markup=start_kb)
+    + "I can transfer style from one picture to another.\n" + "What I can:\n", reply_markup=start_kb)
     users[message.chat.id] = User_INFO()
 
 #/help
@@ -126,14 +126,14 @@ async def personal_settings(callback_query):
 async def image_set(callback_query):
     await bot.answer_callback_query(callback_query.id)
     await callback_query.message.edit_text("Write the integer size of the image you would like to receive\n"
-    + "For example: 128, 256, 512, 1024, ...", reply_markup=back_kb)
+    + "For example: 128, 256, 512, 1024, ...\n", reply_markup=back_kb)
     users[callback_query.from_user.id].params = 1
 
 @dp.callback_query_handler(lambda c: c.data == 'num_steps')
 async def image_set(callback_query):
     await bot.answer_callback_query(callback_query.id)
     await callback_query.message.edit_text("Write the integer number of steps of the image you would like to receive\n"
-    + "For example: 250, 300, 500, ...", reply_markup=back_kb)
+    + "For example: 250, 300, 500, ...\n", reply_markup=back_kb)
     users[callback_query.from_user.id].params = 2
 
 @dp.callback_query_handler(lambda c: c.data == 'style_weight')
@@ -147,7 +147,7 @@ async def image_set(callback_query):
 async def image_set(callback_query):
     await bot.answer_callback_query(callback_query.id)
     await callback_query.message.edit_text("Write the content weight of the image you would like to receive\n"
-    +"Recommend to use small positive numbers. (... <= 1)", reply_markup=back_kb)
+    +"Recommend to use small positive numbers. (... <= 1)\n", reply_markup=back_kb)
     users[callback_query.from_user.id].params = 4
 
 @dp.message_handler(lambda message: message.text.isdigit())
@@ -192,7 +192,7 @@ async def get_image(message):
     else:
         img = message.document
         if not set(":;!_*-+()#%&").isdisjoint(img.mime_type) or img.mime_type[:6] != 'image/':
-            await bot.send_message(message.chat.id, "Upload a file in image format.", reply_markup=start_kb)
+            await bot.send_message(message.chat.id, "Upload a file in image format.\n", reply_markup=start_kb)
             return
     
     file = await bot.get_file(img.file_id)
@@ -218,7 +218,7 @@ async def get_image(message):
             + "1. Check that images have the same format.\n"
             + "2. There may not be enough resources to process the image with your personal settings.\n")
 
-        await bot.send_message(message.chat.id, "So what do we do next?", reply_markup=start_kb)
+        await bot.send_message(message.chat.id, "So what do we do next?\n", reply_markup=start_kb)
         del users[message.chat.id]
 
 
