@@ -250,7 +250,7 @@ if __name__ == '__main__':
         executor.start_polling(dp, skip_updates=True)
 
     elif CONNECTION_TYPE == 'WEBHOOK':
-        WEBHOOK_PATH = f'/webhook/{API_TOKEN}'
+        WEBHOOK_PATH = ''
         WEBHOOK_URL  = f'{WEBHOOK_HOST}{WEBHOOK_PATH}'
         WEBAPP_HOST = '0.0.0.0'
         WEBAPP_PORT = int(os.environ.get('PORT', 5000))
