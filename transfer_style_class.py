@@ -1,5 +1,7 @@
 from PIL import Image
 
+import asyncio
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -138,6 +140,7 @@ class Style_Transfer:
         optimizer = self.get_input_optimizer()
         run = [0]
         while run[0] <= self.num_steps:
+            await asyncio.sleep(0)
             def closure():
                 self.input_img.data.clamp_(0, 1)
 
@@ -160,7 +163,7 @@ class Style_Transfer:
                 loss.backward()
 
                 run[0] += 1
-                if run[0] % 50 == 0:
+                if run[0] % 25 == 0:
                     print("run {}\n".format(run))
 
                 return style_score + content_score
