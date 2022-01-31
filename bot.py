@@ -3,9 +3,14 @@ from aiogram import Bot, Dispatcher, executor, types
 from aiogram.types import InlineKeyboardMarkup
 from aiogram.types import InlineKeyboardButton
 
+from concurrent.futures import ThreadPoolExecutor
+from multiprocessing import cpu_count
+
 import os
 import numpy as np
 from io import BytesIO
+
+import asyncio
 
 from config import *
 from transfer_style_class import *
@@ -14,8 +19,10 @@ from transfer_style_class import *
 logging.basicConfig(level=logging.INFO)
 
 # Initialize bot and dispatcher
+loop = asyncio.get_event_loop()
 bot = Bot(token=API_TOKEN)
-dp = Dispatcher(bot)
+dp = Dispatcher(bot, loop=loop)
+POOL = ThreadPoolExecutor(max_workers=cpu_count())
 
 class User_INFO:
     def __init__(self):
@@ -220,7 +227,7 @@ async def style_transfer(ST_Class, user, style_img, content_img):
         st_class = ST_Class(style_img, content_img)
     elif user.default == 1:
         st_class = ST_Class(style_img, content_img, user.imsize, user.num_steps, user.style_weight, user.content_weight)
-    input_img = await st_class.run_style_transfer()
+    input_img = await dp.loop.run_in_executor(POOL, st_class.run_style_transfer)
     input_img = img_to_media_obj(input_img)
     return input_img  
 
@@ -247,7 +254,7 @@ async def on_shutdown(dp):
 
 if __name__ == '__main__':
     if CONNECTION_TYPE == 'POOLING':
-        executor.start_polling(dp, skip_updates=True)
+        executor.start_polling(dp, loop=loop, skip_updates=True)
 
     elif CONNECTION_TYPE == 'WEBHOOK':
         WEBHOOK_PATH = ''
@@ -258,6 +265,8 @@ if __name__ == '__main__':
         executor.start_webhook(
             dispatcher=dp,
             webhook_path=WEBHOOK_PATH,
+            loop=loop,
+            skip_updates=True,
             on_startup=on_startup,
             on_shutdown=on_shutdown,
             host=WEBAPP_HOST,
