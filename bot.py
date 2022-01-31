@@ -221,13 +221,13 @@ async def style_transfer(ST_Class, user, style_img, content_img):
     elif user.default == 1:
         st_class = ST_Class(style_img, content_img, user.imsize, user.num_steps, user.style_weight, user.content_weight)
     input_img = await st_class.run_style_transfer()
-    input_img = np.rollaxis(input_img.cpu().detach().numpy()[0], 0, 3)
-    input_img = Image.fromarray((input_img * 255).astype('uint8'))
     input_img = img_to_media_obj(input_img)
     return input_img  
 
 
 def img_to_media_obj(img):
+    img = np.rollaxis(img.cpu().detach().numpy()[0], 0, 3)
+    img = Image.fromarray((img * 255).astype('uint8'))
     img_byte_arr = BytesIO()
     img.save(img_byte_arr, format='JPEG')
     img_byte_arr.seek(0)
@@ -260,7 +260,6 @@ if __name__ == '__main__':
             webhook_path=WEBHOOK_PATH,
             on_startup=on_startup,
             on_shutdown=on_shutdown,
-            skip_updates=True,
             host=WEBAPP_HOST,
             port=WEBAPP_PORT,
         )
