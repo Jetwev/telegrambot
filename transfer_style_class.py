@@ -1,3 +1,4 @@
+import asyncio
 from PIL import Image
 
 import torch
@@ -133,12 +134,14 @@ class Style_Transfer:
         optimizer = optim.LBFGS([self.input_img.requires_grad_()]) 
         return optimizer
 
-    def run_style_transfer(self):
+    async def run_style_transfer(self):
         model, style_losses, content_losses = self.get_style_model_and_losses(cnn_normalization_mean, cnn_normalization_std)
         optimizer = self.get_input_optimizer()
         run = [0]
         while run[0] <= self.num_steps:
+            await asyncio.sleep(0)
             def closure():
+                
                 self.input_img.data.clamp_(0, 1)
 
                 optimizer.zero_grad()
