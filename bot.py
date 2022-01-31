@@ -209,14 +209,14 @@ async def get_image(message):
 
     elif users[message.chat.id].wait_photos == 1:
         await bot.send_message(message.chat.id, "In process")
-        try:
-            input_img = await style_transfer(Style_Transfer, users[message.chat.id], users[message.chat.id].photos[0], users[message.chat.id].photos[1])
-            await bot.send_document(message.chat.id, ('image', deepcopy(input_img)))
-            await bot.send_photo(message.chat.id, input_img)
-        except Exception as err:
-            await bot.send_message(message.chat.id, "!! An error has occurred !!\nSome errors:\n"
-            + "1. Check that images have the same format.\n"
-            + "2. There may not be enough resources to process the image with your personal settings.\n")
+        #try:
+        input_img = await style_transfer(Style_Transfer, users[message.chat.id], users[message.chat.id].photos[0], users[message.chat.id].photos[1])
+        await bot.send_document(message.chat.id, ('image', deepcopy(input_img)))
+        await bot.send_photo(message.chat.id, input_img)
+        #except Exception as err:
+        #    await bot.send_message(message.chat.id, "!! An error has occurred !!\nSome errors:\n"
+        #    + "1. Check that images have the same format.\n"
+        #    + "2. There may not be enough resources to process the image with your personal settings.\n")
 
         await bot.send_message(message.chat.id, "So what do we do next?\n", reply_markup=start_kb)
         del users[message.chat.id]
