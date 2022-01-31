@@ -253,7 +253,7 @@ if __name__ == '__main__':
         WEBHOOK_PATH = f'/webhook/{API_TOKEN}'
         WEBHOOK_URL  = f'{WEBHOOK_HOST}{WEBHOOK_PATH}'
         WEBAPP_HOST = '0.0.0.0'
-        WEBAPP_PORT = int(os.environ.get('PORT', 3001))
+        WEBAPP_PORT = int(os.environ.get('PORT', 5000))
 
         executor.start_webhook(
             dispatcher=dp,
