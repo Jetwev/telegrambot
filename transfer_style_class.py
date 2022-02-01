@@ -10,8 +10,8 @@ import torchvision.transforms as transforms
 from copy import deepcopy
 
 #===========================================================================
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-#device = torch.device("cpu")
+#device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = torch.device("cpu")
 cnn_normalization_mean = torch.tensor([0.485, 0.456, 0.406]).to(device)
 cnn_normalization_std = torch.tensor([0.229, 0.224, 0.225]).to(device)
 
@@ -134,14 +134,12 @@ class Style_Transfer:
         optimizer = optim.LBFGS([self.input_img.requires_grad_()]) 
         return optimizer
 
-    async def run_style_transfer(self):
+    def run_style_transfer(self):
         model, style_losses, content_losses = self.get_style_model_and_losses(cnn_normalization_mean, cnn_normalization_std)
         optimizer = self.get_input_optimizer()
         run = [0]
         while run[0] <= self.num_steps:
-            await asyncio.sleep(0)
-            async def closure():
-                await asyncio.sleep(0)
+            def closure():
                 self.input_img.data.clamp_(0, 1)
 
                 optimizer.zero_grad()
@@ -170,7 +168,7 @@ class Style_Transfer:
 
             optimizer.step(closure)
 
-
+        del model
         self.input_img.data.clamp_(0, 1)
 
         return self.input_img
