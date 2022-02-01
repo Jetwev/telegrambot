@@ -139,9 +139,9 @@ class Style_Transfer:
         optimizer = self.get_input_optimizer()
         run = [0]
         while run[0] <= self.num_steps:
-            await asyncio.sleep(10)
-            def closure():
-                
+            await asyncio.sleep(0)
+            async def closure():
+                await asyncio.sleep(0)
                 self.input_img.data.clamp_(0, 1)
 
                 optimizer.zero_grad()
