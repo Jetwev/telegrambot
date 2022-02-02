@@ -1,4 +1,5 @@
 import asyncio
+from time import sleep
 from PIL import Image
 
 import torch
@@ -10,8 +11,8 @@ import torchvision.transforms as transforms
 from copy import deepcopy
 
 #===========================================================================
-#device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-device = torch.device("cpu")
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+#device = torch.device("cpu")
 cnn_normalization_mean = torch.tensor([0.485, 0.456, 0.406]).to(device)
 cnn_normalization_std = torch.tensor([0.229, 0.224, 0.225]).to(device)
 
@@ -168,7 +169,6 @@ class Style_Transfer:
 
             optimizer.step(closure)
 
-        del model
         self.input_img.data.clamp_(0, 1)
 
         return self.input_img

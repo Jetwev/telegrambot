@@ -6,7 +6,7 @@ from aiogram.contrib.fsm_storage.memory import MemoryStorage
 
 #from concurrent.futures import ThreadPoolExecutor
 #from multiprocessing import cpu_count
-from concurrent.futures import ProcessPoolExecutor
+#from concurrent.futures import ProcessPoolExecutor
 
 import os
 import numpy as np
@@ -21,13 +21,13 @@ from transfer_style_class import *
 logging.basicConfig(level=logging.INFO)
 
 # Initialize bot and dispatcher
-#loop = asyncio.get_event_loop()
+loop = asyncio.get_event_loop()
 bot = Bot(token=API_TOKEN)
 storage = MemoryStorage()
-dp = Dispatcher(bot, storage=storage)
-pool = ProcessPoolExecutor(max_workers=1)
-#dp = Dispatcher(bot, storage=storage, loop=loop)
+dp = Dispatcher(bot, storage=storage, loop=loop)
 #pool = ThreadPoolExecutor(max_workers=cpu_count())
+#dp = Dispatcher(bot, storage=storage)
+#pool = ProcessPoolExecutor(max_workers=1)
 
 class User_INFO:
     def __init__(self):
@@ -214,14 +214,14 @@ async def get_image(message):
 
     elif users[message.chat.id].wait_photos == 1:
         await bot.send_message(message.chat.id, "In process")
-        try:
-            input_img = await style_transfer(Style_Transfer, users[message.chat.id], users[message.chat.id].photos[0], users[message.chat.id].photos[1])
-            await bot.send_document(message.chat.id, ('image', deepcopy(input_img)))
-            await bot.send_photo(message.chat.id, input_img)
-        except Exception as err:
-            await bot.send_message(message.chat.id, "!! An error has occurred !!\nSome errors:\n"
-            + "1. Check that images have the same format.\n"
-            + "2. There may not be enough resources to process the image with your personal settings.\n")
+        #try:
+        input_img = await style_transfer(Style_Transfer, users[message.chat.id], users[message.chat.id].photos[0], users[message.chat.id].photos[1])
+        await bot.send_document(message.chat.id, ('image', deepcopy(input_img)))
+        await bot.send_photo(message.chat.id, input_img)
+        #except Exception as err:
+        #    await bot.send_message(message.chat.id, "!! An error has occurred !!\nSome errors:\n"
+        #    + "1. Check that images have the same format.\n"
+        #    + "2. There may not be enough resources to process the image with your personal settings.\n")
 
         await bot.send_message(message.chat.id, "So what do we do next?\n", reply_markup=start_kb)
         del users[message.chat.id]
@@ -232,10 +232,12 @@ async def style_transfer(ST_Class, user, style_img, content_img):
         st_class = ST_Class(style_img, content_img)
     elif user.default == 1:
         st_class = ST_Class(style_img, content_img, user.imsize, user.num_steps, user.style_weight, user.content_weight)
-    #input_img = await dp.loop.run_in_executor(pool, st_class.run_style_transfer)
-    #input_img = st_class.run_style_transfer()
-    loop = asyncio.get_running_loop()
-    input_img = await loop.run_in_executor(pool, st_class.run_style_transfer)
+    input_img = await dp.loop.run_in_executor(None, st_class.run_style_transfer)
+    #loop = asyncio.get_event_loop()
+    #input_img = await asyncio.run(st_class.run_style_transfer())
+    #loop = asyncio.get_running_loop()
+    #input_img = await loop.run_in_executor(pool, st_class.run_style_transfer)
+    #input_img = await st_class.run_style_transfer()
     input_img = img_to_media_obj(input_img)
     return input_img  
 
