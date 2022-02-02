@@ -1,5 +1,3 @@
-import asyncio
-from time import sleep
 from PIL import Image
 
 import torch
@@ -9,6 +7,7 @@ import torch.optim as optim
 import torchvision.transforms as transforms
 
 from copy import deepcopy
+import asyncio
 
 #===========================================================================
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

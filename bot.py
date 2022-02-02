@@ -4,10 +4,6 @@ from aiogram.types import InlineKeyboardMarkup
 from aiogram.types import InlineKeyboardButton
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 
-#from concurrent.futures import ThreadPoolExecutor
-#from multiprocessing import cpu_count
-#from concurrent.futures import ProcessPoolExecutor
-
 import os
 import numpy as np
 from io import BytesIO
@@ -25,9 +21,6 @@ loop = asyncio.get_event_loop()
 bot = Bot(token=API_TOKEN)
 storage = MemoryStorage()
 dp = Dispatcher(bot, storage=storage, loop=loop)
-#pool = ThreadPoolExecutor(max_workers=cpu_count())
-#dp = Dispatcher(bot, storage=storage)
-#pool = ProcessPoolExecutor(max_workers=1)
 
 class User_INFO:
     def __init__(self):
@@ -233,11 +226,6 @@ async def style_transfer(ST_Class, user, style_img, content_img):
     elif user.default == 1:
         st_class = ST_Class(style_img, content_img, user.imsize, user.num_steps, user.style_weight, user.content_weight)
     input_img = await dp.loop.run_in_executor(None, st_class.run_style_transfer)
-    #loop = asyncio.get_event_loop()
-    #input_img = await asyncio.run(st_class.run_style_transfer())
-    #loop = asyncio.get_running_loop()
-    #input_img = await loop.run_in_executor(pool, st_class.run_style_transfer)
-    #input_img = await st_class.run_style_transfer()
     input_img = img_to_media_obj(input_img)
     return input_img  
 
