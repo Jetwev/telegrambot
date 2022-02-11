@@ -7,11 +7,11 @@ import torch.optim as optim
 import torchvision.transforms as transforms
 
 from copy import deepcopy
-import asyncio
+#import asyncio
 
 #===========================================================================
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-#device = torch.device("cpu")
+device = torch.device("cpu")
+#device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 cnn_normalization_mean = torch.tensor([0.485, 0.456, 0.406]).to(device)
 cnn_normalization_std = torch.tensor([0.229, 0.224, 0.225]).to(device)
 
@@ -25,7 +25,7 @@ class ContentLoss(nn.Module):
     def __init__(self, target,):
         super(ContentLoss, self).__init__()
         self.target = target.detach()
-        self.loss = F.mse_loss(self.target, self.target )
+        self.loss = F.mse_loss(self.target, self.target)
 
     def forward(self, input):
         self.loss = F.mse_loss(input, self.target)
@@ -85,8 +85,7 @@ class Style_Transfer:
 
     def get_style_model_and_losses(self, normalization_mean, normalization_std, content_layers=content_layers_default, style_layers=style_layers_default):
         cnn = deepcopy(model_vgg19)
-        normalization = Normalization(normalization_mean, normalization_std).to(device)
-                                   
+        normalization = Normalization(normalization_mean, normalization_std).to(device)             
         content_losses = []
         style_losses = []
 

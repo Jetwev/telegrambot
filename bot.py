@@ -3,6 +3,8 @@ from aiogram import Bot, Dispatcher, executor, types
 from aiogram.types import InlineKeyboardMarkup
 from aiogram.types import InlineKeyboardButton
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
+#from concurrent.futures import ProcessPoolExecutor
+#from concurrent.futures import ThreadPoolExecutor
 
 import os
 import numpy as np
@@ -20,7 +22,9 @@ logging.basicConfig(level=logging.INFO)
 loop = asyncio.get_event_loop()
 bot = Bot(token=API_TOKEN)
 storage = MemoryStorage()
-dp = Dispatcher(bot, storage=storage, loop=loop)
+dp = Dispatcher(bot, loop=loop, storage=storage)
+#pool = ThreadPoolExecutor()
+#pool = ProcessPoolExecutor()
 
 class User_INFO:
     def __init__(self):
@@ -55,6 +59,9 @@ settings_kb.add(InlineKeyboardButton('Back', callback_data='menu'))
 back_kb = InlineKeyboardMarkup()
 back_kb.add(InlineKeyboardButton('Back', callback_data='menu'))
 
+back_kb2 = InlineKeyboardMarkup()
+back_kb2.add(InlineKeyboardButton('Back', callback_data='personal'))
+
 settings_personal_kb = InlineKeyboardMarkup()
 settings_personal_kb.add(InlineKeyboardButton('Image size', callback_data='imsize'))
 settings_personal_kb.add(InlineKeyboardButton('Number of steps', callback_data='num_steps'))
@@ -62,7 +69,7 @@ settings_personal_kb.add(InlineKeyboardButton('Style weight', callback_data='sty
 settings_personal_kb.add(InlineKeyboardButton('Content weight', callback_data='content_weight'))
 settings_personal_kb.add(InlineKeyboardButton('Info', callback_data='info'))
 settings_personal_kb.add(InlineKeyboardButton('Next', callback_data='next'))
-settings_personal_kb.add(InlineKeyboardButton('Back', callback_data='menu'))
+settings_personal_kb.add(InlineKeyboardButton('Back', callback_data='style'))
 
 #/start
 @dp.message_handler(commands=['start'])
@@ -124,28 +131,28 @@ async def personal_settings(callback_query):
 async def image_set(callback_query):
     await bot.answer_callback_query(callback_query.id)
     await callback_query.message.edit_text("Write the integer size of the image you would like to receive\n"
-    + "For example: 128, 256, 512, 1024, ...\n", reply_markup=back_kb)
+    + "For example: 128, 256, 512, 1024, ...\n", reply_markup=back_kb2)
     users[callback_query.from_user.id].params = 1
 
 @dp.callback_query_handler(lambda c: c.data == 'num_steps')
 async def image_set(callback_query):
     await bot.answer_callback_query(callback_query.id)
     await callback_query.message.edit_text("Write the integer number of steps of the image you would like to receive\n"
-    + "For example: 250, 300, 500, ...\n", reply_markup=back_kb)
+    + "For example: 250, 300, 500, ...\n", reply_markup=back_kb2)
     users[callback_query.from_user.id].params = 2
 
 @dp.callback_query_handler(lambda c: c.data == 'style_weight')
 async def image_set(callback_query):
     await bot.answer_callback_query(callback_query.id)
     await callback_query.message.edit_text("Write the style weight of the image you would like to receive\n"
-    + "Recommend to use big positive numbers. (100000 >= ...)\n", reply_markup=back_kb)
+    + "Recommend to use big positive numbers. (100000 >= ...)\n", reply_markup=back_kb2)
     users[callback_query.from_user.id].params = 3
 
 @dp.callback_query_handler(lambda c: c.data == 'content_weight')
 async def image_set(callback_query):
     await bot.answer_callback_query(callback_query.id)
     await callback_query.message.edit_text("Write the content weight of the image you would like to receive\n"
-    +"Recommend to use small positive numbers. (... <= 1)\n", reply_markup=back_kb)
+    +"Recommend to use small positive numbers. (... <= 1)\n", reply_markup=back_kb2)
     users[callback_query.from_user.id].params = 4
 
 @dp.message_handler(lambda message: message.text.isdigit())
@@ -206,16 +213,17 @@ async def get_image(message):
         + "IMPORTANT: Use the same image file formats for both pictures.\n", reply_markup=back_kb)
 
     elif users[message.chat.id].wait_photos == 1:
+        users[message.chat.id].wait_photos = None
         await bot.send_message(message.chat.id, "In process")
-        #try:
-        input_img = await style_transfer(Style_Transfer, users[message.chat.id], users[message.chat.id].photos[0], users[message.chat.id].photos[1])
-        await bot.send_document(message.chat.id, ('image', deepcopy(input_img)))
-        await bot.send_photo(message.chat.id, input_img)
-        #except Exception as err:
-        #    await bot.send_message(message.chat.id, "!! An error has occurred !!\nSome errors:\n"
-        #    + "1. Check that images have the same format.\n"
-        #    + "2. There may not be enough resources to process the image with your personal settings.\n")
-
+        try:
+            input_img = await style_transfer(Style_Transfer, users[message.chat.id], users[message.chat.id].photos[0], users[message.chat.id].photos[1])
+            await bot.send_document(message.chat.id, ('image', deepcopy(input_img)))
+            await bot.send_photo(message.chat.id, input_img)
+        except Exception:
+            await bot.send_message(message.chat.id, "!! An error has occurred !!\nSome errors:\n"
+            + "1. Check that images have the same format.\n"
+            + "2. There may not be enough resources to process the image with your personal settings.\n"
+            + "3. Or something's going wrong.\n")
         await bot.send_message(message.chat.id, "So what do we do next?\n", reply_markup=start_kb)
         del users[message.chat.id]
 
@@ -226,6 +234,7 @@ async def style_transfer(ST_Class, user, style_img, content_img):
     elif user.default == 1:
         st_class = ST_Class(style_img, content_img, user.imsize, user.num_steps, user.style_weight, user.content_weight)
     input_img = await dp.loop.run_in_executor(None, st_class.run_style_transfer)
+    #input_img = await dp.loop.run_in_executor(pool, st_class.run_style_transfer)
     input_img = img_to_media_obj(input_img)
     return input_img  
 
@@ -255,14 +264,14 @@ if __name__ == '__main__':
         executor.start_polling(dp, skip_updates=True)
 
     elif CONNECTION_TYPE == 'WEBHOOK':
-        WEBHOOK_PATH = f'webhook/{API_TOKEN}/'
+        WEBHOOK_PATH = ''
         WEBHOOK_URL  = f'{WEBHOOK_HOST}{WEBHOOK_PATH}'
         WEBAPP_HOST = '0.0.0.0'
-        WEBAPP_PORT = int(os.environ.get('PORT', 5000))
+        WEBAPP_PORT = int(os.environ.get('PORT', '5000'))
 
         executor.start_webhook(
             dispatcher=dp,
-            webhook_path=f'/{WEBHOOK_PATH}',
+            webhook_path='',
             on_startup=on_startup,
             on_shutdown=on_shutdown,
             host=WEBAPP_HOST,
