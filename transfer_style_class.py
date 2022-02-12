@@ -18,7 +18,10 @@ cnn_normalization_std = torch.tensor([0.229, 0.224, 0.225]).to(device)
 content_layers_default = ['conv_4']
 style_layers_default = ['conv_1', 'conv_2', 'conv_3', 'conv_4', 'conv_5']
 
-model_vgg19 = torch.load('model/vgg19.pth',).to(device).eval()
+#cnn = models.vgg19(pretrained=True).features.to('cpu').eval()
+#torch.save(cnn[:11], 'my_new_model.pth')
+#model_vgg19 = torch.load('model/vgg19.pth',).to(device).eval()
+model_vgg19 = torch.load('model/vgg19_2.pth').to(device).eval()
 #===========================================================================
 
 class ContentLoss(nn.Module):
